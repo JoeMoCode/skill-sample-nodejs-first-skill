@@ -1,0 +1,79 @@
+{
+    "type": "Alexa.Presentation.APL.ExecuteCommands",
+    "token": "none",
+    "commands": [{
+        "type": "Parallel",
+        "when": "${environment.aplVersion == '1.1'}",
+        "commands": [
+            {
+                "type": "Sequential",
+                "commands": [
+                    {
+                        "type": "Parallel",
+                        "commands": [{
+                                "type": "AnimateItem",
+                                "easing": "ease-in-out",
+                                "duration": 4000,
+                                "componentId": "textId1",
+                                "value": [{
+                                        "property": "opacity",
+                                        "to": 1
+                                    },
+                                    {
+                                        "property": "transform",
+                                        "from": [{
+                                            "translateX": "100vw"
+                                        } ],
+                                        "to": [{
+                                            "translateX": 0
+                                        } ]
+                                    }
+                                ]
+                            },
+                            {
+                                "type": "AnimateItem",
+                                "easing": "ease-in-out",
+                                "duration": 6000,
+                                "componentId": "textId2",
+                                "value": [{
+                                        "property": "opacity",
+                                        "to": 1
+                                    },
+                                    {
+                                        "property": "transform",
+                                        "from": [{
+                                            "translateX": "-100vw"
+                                        } ],
+                                        "to": [{
+                                            "translateX": "0vw"
+                                        } ]
+                                    }
+                                ]
+                            },
+                            {
+                                "type": "AnimateItem",
+                                "easing": "ease-in-out",
+                                "duration": 8000,
+                                "componentId": "textId3",
+                                "value": [{
+                                        "property": "opacity",
+                                        "to": 1
+                                    },
+                                    {
+                                        "property": "transform",
+                                        "from": [{
+                                            "translateY": "100vw"
+                                        }],
+                                        "to": [{
+                                            "translateY": 0
+                                        }]
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }]
+}

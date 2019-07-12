@@ -1,0 +1,66 @@
+{
+    "type": "APL",
+    "version": "1.1",
+    "theme": "auto",
+    "import": [{
+        "name": "alexa-layouts",
+        "version": "1.0.0"
+    }],
+    "mainTemplate": {
+        "parameters": [
+            "payload"
+        ],
+        "item": {
+            "type": "Frame",
+            "width": "100%",
+            "height": "100%",
+            "backgroundColor": "@BGColor",
+            "item": {
+                "type": "Container",
+                "width": "100vw",
+                "height": "100vh",
+                "items": [
+                    {
+                        "type": "Text",
+                        "text": "Happy",
+                        "color": "@HappyBirthdayColor",
+                        "textAlign": "center",
+                        "fontSize": 90,
+                        "id": "textId1",
+                        "opacity": "${environment.aplVersion == '1.1' ? 0 : 1}"
+                    },
+                    {
+                        "type": "Text",
+                        "top": "20dp",
+                        "text": "${payload.birthdayData.properties.year}th",
+                        "color": "@HappyBirthdayColor",
+                        "textAlign": "center",
+                        "fontSize": 50,
+                        "id": "textId2",
+                        "opacity": "${environment.aplVersion == '1.1' ? 0 : 1}"
+                    },
+                    {
+                        "type": "Text",
+                        "text": "Birthday",
+                        "color": "@HappyBirthdayColor",
+                        "textAlign": "center",
+                        "fontSize": 90,
+                        "id": "textId3",
+                        "opacity": "${environment.aplVersion == '1.1' ? 0 : 1}"
+                    }
+                ]
+            }
+        }
+    },
+    "resources":[
+      {
+        "colors": {
+          "BGColor": "#1111CC",
+          "HappyBirthdayColor": "#FFFF00"
+        },
+        "string": {
+          "logo": "images/logo200x200.png"
+        }
+      }
+    ]
+}

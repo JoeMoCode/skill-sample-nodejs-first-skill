@@ -5,11 +5,9 @@ const Alexa = require('ask-sdk-core');
 const persistenceAdapter = require('ask-sdk-s3-persistence-adapter');
 const launchDoc = require('./documents/launchScreen.json');
 
-//Used for Getting S3 client.
-const AWS = require('aws-sdk');
-const s3SigV4Client = new AWS.S3({
-    signatureVersion: 'v4'
-});
+const util = require('./util');
+const commands = require('./documents/commands.json');
+const birthdayDoc = require('./documents/birthdayScreen.json');
 
 const HasBirthdayLaunchRequestHandler = {
     canHandle(handlerInput) {
@@ -73,14 +71,73 @@ const HasBirthdayLaunchRequestHandler = {
         // setting the default speakOutput to Happy xth Birthday!! 
         // Alexa will automatically correct the ordinal for you.
         // no need to worry about when to use st, th, rd
-        let speakOutput = `Happy ${currentYear - year}th birthday!`;
+        const yearsOld = currentYear - year;
+        let speakOutput = `Happy ${yearsOld}th birthday!`;
+        let isBirthday = true;
+
         if (currentDate.getTime() !== nextBirthday) {
+            isBirthday = false;
             const diffDays = Math.round(Math.abs((currentDate.getTime() - nextBirthday)/oneDay));
             speakOutput = `Welcome back. It looks like there are ${diffDays} days until your ${currentYear - year}th birthday.`
         }
 
-        const headerMessage = "header";
+        const headerMessage = "LaunchRequest with All";
         const hintString = "This is my hint";
+
+        // Add APL directive to response
+        if (supportsAPL(handlerInput)) {
+            if(!isBirthday){
+                const {Viewport} = handlerInput.requestEnvelope.context;
+                const resolution = Viewport.pixelWidth + 'x' + Viewport.pixelHeight;
+                handlerInput.responseBuilder.addDirective({
+                    type: 'Alexa.Presentation.APL.RenderDocument',
+                    version: '1.0',
+                    document: launchDoc,
+                    datasources: {
+                        launchData: {
+                            type: 'object',
+                            properties: {
+                                headerTitle: headerMessage,
+                                mainText: speakOutput,
+                                hintString: hintString,
+                                logoImage: Viewport.pixelWidth > 480 ? util.getS3PreSignedUrl('Media/full_icon_512.png') : util.getS3PreSignedUrl('Media/full_icon_108.png'),
+                                backgroundImage: util.getS3PreSignedUrl('Media/garlands_'+resolution+'.png'),
+                                backgroundOpacity: "0.5"
+                            },
+                            transformers: [{
+                                inputPath: 'hintString',
+                                transformer: 'textToHint',
+                            }]
+                        }
+                    }
+                });
+            } else {
+                addAnimations(handlerInput, yearsOld);
+            }
+        }
+        
+        // Add card to response
+        handlerInput.responseBuilder.withStandardCard(
+                headerMessage,
+                speakOutput,
+                util.getS3PreSignedUrl('Media/garlands_480x480.png'));
+
+        return handlerInput.responseBuilder
+            .speak(speakOutput)
+            .getResponse();
+    }
+};
+
+const LaunchRequestHandler = {
+    canHandle(handlerInput) {
+        return handlerInput.requestEnvelope.request.type === 'LaunchRequest';
+    },
+    handle(handlerInput) {
+        const speakOutput = 'Hello! Welcome to Cake walk. What is your birthday?';
+        const repromptOutput = 'I was born Nov. 6th, 2015. When were you born?'; 
+
+        const headerMessage = "Default LaunchRequest";
+        const hintString = "Say your birthday!";   
 
         // Add APL directive to response
         if (supportsAPL(handlerInput)) {
@@ -97,8 +154,8 @@ const HasBirthdayLaunchRequestHandler = {
                             headerTitle: headerMessage,
                             mainText: speakOutput,
                             hintString: hintString,
-                            logoImage: Viewport.pixelWidth > 480 ? getS3PreSignedUrl('full_icon_512.png') : getS3PreSignedUrl('full_icon_108.png'),
-                            backgroundImage: getS3PreSignedUrl('garlands_'+resolution+'.png'),
+                            logoImage: Viewport.pixelWidth > 480 ? util.getS3PreSignedUrl('Media/full_icon_512.png') : util.getS3PreSignedUrl('Media/full_icon_108.png'),
+                            backgroundImage: util.getS3PreSignedUrl('Media/lights_'+resolution+'.png'),
                             backgroundOpacity: "0.5"
                         },
                         transformers: [{
@@ -109,26 +166,12 @@ const HasBirthdayLaunchRequestHandler = {
                 }
             });
         }
-        
+
         // Add card to response
         handlerInput.responseBuilder.withStandardCard(
                 headerMessage,
                 speakOutput,
-                getS3PreSignedUrl('Media/garlands_480x480.png'));
-
-        return handlerInput.responseBuilder
-            .speak(speakOutput)
-            .getResponse();
-    }
-};
-
-const LaunchRequestHandler = {
-    canHandle(handlerInput) {
-        return handlerInput.requestEnvelope.request.type === 'LaunchRequest';
-    },
-    handle(handlerInput) {
-        const speakOutput = 'Hello! Welcome to Cake walk. What is your birthday?';
-        const repromptOutput = 'I was born Nov. 6th, 2015. When were you born?';    
+                util.getS3PreSignedUrl('Media/garlands_480x480.png'));
 
         return handlerInput.responseBuilder
             .speak(speakOutput)
@@ -156,8 +199,45 @@ const BirthdayIntentHandler = {
         };
         attributesManager.setPersistentAttributes(birthdayAttributes);
         await attributesManager.savePersistentAttributes();    
-        
+
+        const headerMessage = "CaptureBirthdayIntent";
+        const hintString = "This is my hint";
         const speakOutput = `Thanks, I'll remember that you were born ${month} ${day} ${year}.`;
+
+        // Add APL directive to response
+        if (supportsAPL(handlerInput)) {
+            const {Viewport} = handlerInput.requestEnvelope.context;
+            const resolution = Viewport.pixelWidth + 'x' + Viewport.pixelHeight;
+            handlerInput.responseBuilder.addDirective({
+                type: 'Alexa.Presentation.APL.RenderDocument',
+                version: '1.0',
+                document: launchDoc,
+                datasources: {
+                    launchData: {
+                        type: 'object',
+                        properties: {
+                            headerTitle: headerMessage,
+                            mainText: speakOutput,
+                            hintString: hintString,
+                            logoImage: Viewport.pixelWidth > 480 ? util.getS3PreSignedUrl('Media/full_icon_512.png') : util.getS3PreSignedUrl('Media/full_icon_108.png'),
+                            backgroundImage: util.getS3PreSignedUrl('Media/straws_'+resolution+'.png'),
+                            backgroundOpacity: "0.5"
+                        },
+                        transformers: [{
+                            inputPath: 'hintString',
+                            transformer: 'textToHint',
+                        }]
+                    }
+                }
+            });
+        }
+        
+        // Add card to response
+        handlerInput.responseBuilder.withStandardCard(
+                headerMessage,
+                speakOutput,
+                util.getS3PreSignedUrl('Media/garlands_480x480.png'));
+
         return handlerInput.responseBuilder
             .speak(speakOutput)
             //.reprompt('add a reprompt if you want to keep the session open for the user to respond')
@@ -255,9 +335,28 @@ const LoadBirthdayInterceptor = {
 }
 
 //Utility Functions
-function getS3PreSignedUrl(filename) {
-    return "https://raw.githubusercontent.com/germanviscuso/ASKVideoSeries/master/08/lambda/documents/images/" + filename;
+function addAnimations(handlerInput, yearsOld) {
+    handlerInput.responseBuilder
+        .addDirective(
+        {
+                    type: 'Alexa.Presentation.APL.RenderDocument',
+                    version: '1.1',
+                    document: birthdayDoc,
+                    datasources: {
+                        birthdayData: {
+                            type: 'object',
+                            properties: {
+                                year: yearsOld
+                            }
+                        }
+                    }
+                })
+        .addDirective(commands);
 }
+
+// function getS3PreSignedUrl(filename) {
+    // return "https://raw.githubusercontent.com/germanviscuso/ASKVideoSeries/master/08/lambda/documents/images/" + filename;
+// }
 
 function supportsAPL(handlerInput) {
     const {supportedInterfaces} = handlerInput.requestEnvelope.context.System.device;
