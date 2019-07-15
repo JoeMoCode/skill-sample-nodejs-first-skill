@@ -1,11 +1,11 @@
 {
     "launchData": {
         "properties": {
-            "headerTitle": "Feliz Cumpleaños",
-            "mainText": "Aún no me has dicho la fecha",
-            "hintString": "cuando cumplo años?",
-            "logoImage": "https://yourimgurlhere",
-            "backgroundImage": "https://yourimgurlhere",
+            "headerTitle": "Happy Birthday",
+            "mainText": "You have not told me your birthday, yet.",
+            "hintString": "Hint, Tell me the month?",
+            "logoImage": "https://github.com/JoeMoCode/skill-sample-nodejs-first-skill/blob/apl/apl/documents/images/full_icon_512.png?raw=true",
+            "backgroundImage": "https://raw.githubusercontent.com/JoeMoCode/skill-sample-nodejs-first-skill/apl/apl/documents/images/papers_1920x1080.png",
             "backgroundOpacity": "0.5"
         }
     }
