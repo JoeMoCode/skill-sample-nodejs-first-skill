@@ -57,9 +57,6 @@
         "colors": {
           "BGColor": "#1111CC",
           "HappyBirthdayColor": "#FFFF00"
-        },
-        "string": {
-          "logo": "images/logo200x200.png"
         }
       }
     ]

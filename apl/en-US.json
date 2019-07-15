@@ -36,6 +36,7 @@
                         }
                     ],
                     "samples": [
+                        "{month}",
                         "{month} {day}",
                         "{month} {day} {year}",
                         "{month} {year}",

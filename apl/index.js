@@ -240,7 +240,7 @@ const BirthdayIntentHandler = {
 
         return handlerInput.responseBuilder
             .speak(speakOutput)
-            //.reprompt('add a reprompt if you want to keep the session open for the user to respond')
+            .withShouldEndSession(true)
             .getResponse();
     }
 };
@@ -353,10 +353,6 @@ function addAnimations(handlerInput, yearsOld) {
                 })
         .addDirective(commands);
 }
-
-// function getS3PreSignedUrl(filename) {
-    // return "https://raw.githubusercontent.com/germanviscuso/ASKVideoSeries/master/08/lambda/documents/images/" + filename;
-// }
 
 function supportsAPL(handlerInput) {
     const {supportedInterfaces} = handlerInput.requestEnvelope.context.System.device;
